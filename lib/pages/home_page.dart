@@ -18,7 +18,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
           title: const Text(
-            'NoteSphere',
+            'NoteSphere ',
             style: TextStyles.appTitle,
           ),
         ),
@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
 
                       AppRouter.router.push("/notesPage");
                     },
-                    child: NotesTodoCard(
+                    child: const NotesTodoCard(
                       icon: Icons.bookmark_add_outlined,
                       title: 'Notes',
                       description: '3 Notes',
@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                       // AppRouter.router.go("/todoPage");
                       AppRouter.router.push("/todoPage");
                     },
-                    child: NotesTodoCard(
+                    child: const NotesTodoCard(
                       icon: Icons.today_outlined,
                       title: 'To-Do List',
                       description: '3 Tasks',

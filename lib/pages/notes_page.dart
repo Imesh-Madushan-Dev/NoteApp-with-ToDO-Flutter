@@ -3,7 +3,9 @@ import 'package:notes_sphere/models/note_model.dart';
 import 'package:notes_sphere/service/note_service.dart';
 import 'package:notes_sphere/utils/colors.dart';
 import 'package:notes_sphere/utils/constants.dart';
+import 'package:notes_sphere/utils/router.dart';
 import 'package:notes_sphere/utils/text_styles.dart';
+import 'package:notes_sphere/widgets/bottom_sheet.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -28,7 +30,6 @@ class _NotesPageState extends State<NotesPage> {
     final bool isNewUser = await noteService.isNewUser();
     if (isNewUser) {
       await noteService.createInitialNotes();
-      print('Initial notes created');
     }
     _loadNotes(); // Load the notes after checking
   }
@@ -46,6 +47,27 @@ class _NotesPageState extends State<NotesPage> {
     final categories = notes.map((note) => note.category).toSet().toList();
     categories.insert(0, 'All'); // Add 'All' as the first category
     return categories;
+  }
+
+  //*  open Bottom Sheet
+
+  void openBottomSheet() {
+    showModalBottomSheet(
+      barrierColor: Colors.black.withOpacity(0.7),
+      context: context,
+      builder: (context) {
+        return CategoryInputBottonSheet(
+          onNewNote: () {
+            AppRouter.router.push('/newNotePage', extra: false);
+            Navigator.pop(context);
+          },
+          onNewCategory: () {
+            AppRouter.router.push('/newNotePage', extra: true);
+            Navigator.pop(context);
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -71,9 +93,7 @@ class _NotesPageState extends State<NotesPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(100),
         ),
-        onPressed: () {
-          // Add new note logic here
-        },
+        onPressed: openBottomSheet,
         backgroundColor: AppColors.kFloatingButton,
         child: const Icon(
           Icons.add,
@@ -96,7 +116,6 @@ class _NotesPageState extends State<NotesPage> {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      
                       children: getCategories().map((category) {
                         final isSelected = category == selectedCategory ||
                             (category == 'All' && selectedCategory == null);
@@ -126,10 +145,132 @@ class _NotesPageState extends State<NotesPage> {
                       }).toList(),
                     ),
                   ),
-                  const SizedBox(height: 16.0),
+                  const SizedBox(height: 25),
                   // Display filtered notes
                   Expanded(
-                    child: ListView.builder(
+                    child: GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, // Two cards per row
+                        crossAxisSpacing:
+                            8.0, // Horizontal spacing between cards
+                        mainAxisSpacing: 8.0, // Vertical spacing between cards
+                        childAspectRatio:
+                            0.7, // Adjust aspect ratio for better appearance
+                      ),
+                      itemCount: displayedNotes.length,
+                      itemBuilder: (context, index) {
+                        final note = displayedNotes[index];
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                                10), // Rounded corners for the card
+                            color:
+                                AppColors.kCardColor, // Card background color
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(
+                                    0.1), // Light shadow for elevation effect
+                                blurRadius: 4,
+                                offset: const Offset(0, 2), // Shadow offset
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(
+                                12.0), // Padding inside the card
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment
+                                  .start, // Align items to the start
+                              children: [
+                                // Title text
+                                Text(
+                                  note.title,
+                                  style: TextStyles.appSubTitle
+                                      .copyWith(fontSize: 20),
+                                  maxLines:
+                                      1, // Limit to 1 line to prevent overflow
+                                  overflow: TextOverflow
+                                      .ellipsis, // Add ellipsis if text is too long
+                                ),
+                                const SizedBox(
+                                    height: 8.0), // Spacing below the title
+
+                                // Category text
+                                Text(
+                                  note.category,
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.kWhiteColor),
+                                  maxLines: 1, // Ensure it fits within 1 line
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(
+                                    height: 8.0), // Spacing below the category
+
+                                // Content text
+                                Text(
+                                  note.content,
+                                  maxLines:
+                                      3, // Limit to 3 lines for better content visibility
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyles.appDescriptionSmall
+                                      .copyWith(color: Colors.grey[500]),
+                                ),
+                                const Expanded(child: SizedBox()),
+                                // Date text, aligned at the bottom
+                                Text(
+                                    '${note.date.day}/${note.date.month}/${note.date.year}',
+                                    style: TextStyles.appDescriptionSmall),
+                                const SizedBox(height: 18),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      child: const Icon(
+                                        Icons.edit,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: AppConstants.kDefaultPadiing),
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          await noteService.deleteNote(note
+                                              .id); // Delete the note from Hive
+                                          setState(() {
+                                            notes.removeWhere((n) =>
+                                                n.id ==
+                                                note.id); // Remove the note locally
+                                          });
+                                        },
+                                        child: const Icon(
+                                          Icons.delete,
+                                          color: Colors.redAccent,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+
+/* 
+ListView.builder(
                       itemCount: displayedNotes.length,
                       itemBuilder: (context, index) {
                         final note = displayedNotes[index];
@@ -171,10 +312,4 @@ class _NotesPageState extends State<NotesPage> {
                         );
                       },
                     ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
+*/

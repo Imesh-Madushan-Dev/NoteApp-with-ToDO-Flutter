@@ -1,3 +1,5 @@
+// ignore_for_file: empty_catches
+
 import 'package:hive/hive.dart';
 import 'package:notes_sphere/models/note_model.dart';
 import 'package:uuid/uuid.dart';
@@ -97,10 +99,14 @@ class NoteService {
 
   //* Method to update / edit a note
   Future<void> updateNote(Note note) async {
-    final index =
-        _myBox.values.toList().indexWhere((element) => element.id == note.id);
-    if (index != -1) {
-      await _myBox.putAt(index, note); // Update the note at the specified index
+    try {
+      final index =
+          _myBox.values.toList().indexWhere((element) => element.id == note.id);
+      if (index != -1) {
+        await _myBox.putAt(
+            index, note); // Update the note at the specified index
+      }
+    } catch (e) {
     }
   }
 

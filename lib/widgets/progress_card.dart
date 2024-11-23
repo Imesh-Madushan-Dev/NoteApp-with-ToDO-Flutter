@@ -39,26 +39,26 @@ class _ProgressCardState extends State<ProgressCard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Today's Progress",
+                    "Your Progress 👻",
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyles.appSubTitle,
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "You have completed ${widget.completedTask} out of ${widget.totalTask} tasks, keep up the progress!",
+                    "You have completed ${widget.completedTask} out of ${widget.totalTask} tasks ! 🔥",
                     style: TextStyles.appDescriptionSmall.copyWith(
                         color: AppColors.kWhiteColor.withOpacity(0.5)),
                   ),
                 ],
               ),
             ),
-            Container(
-              height: MediaQuery.of(context).size.width * 0.22,
-              width: MediaQuery.of(context).size.width * 0.22,
+            SizedBox(
+              height: MediaQuery.of(context).size.width * 0.23,
+              width: MediaQuery.of(context).size.width * 0.23,
               child: Center(
                 child: Text(
-                  "$completionPercentage%",
+                  "$completionPercentage% ",
                   style: TextStyles.appSubTitle.copyWith(
                       color: AppColors.kFloatingButton,
                       fontWeight: FontWeight.bold),
